@@ -54,7 +54,7 @@
 #' @return A video file in mp4 format in the working directory with the scrolling spectrogram.
 #' @export
 #' @name scrolling_spectro
-#' @details The function creates videos (mp4 format) of single row spectrograms scrolling from right to left. The audio is sync'ed with the spectrograms. 
+#' @details The function creates videos (mp4 format) of single row spectrograms scrolling from right to left. The audio is sync'ed with the spectrograms. Sound files with a sampling rate other than 44.1 kHz will be resampled to 44.1 kHz as required by ffmpeg when embeding audio to video files.
 #' @seealso \code{\link[seewave]{spectro}}
 #' @examples
 #' \dontrun{
@@ -76,13 +76,17 @@
 scrolling_spectro <- function(wave, file.name = "scroll.spectro.mp4", hop.size = 11.6, wl = NULL, ovlp = 70, flim = NULL, pal = seewave::reverse.gray.colors.1, speed = 1, fps = 50, t.display = 1.5, fix.time = TRUE, res = 70, width = 700, height = 400, parallel = 1, pb = TRUE, play = TRUE, loop = 1, lcol = "#07889B99", lty = 2, lwd = 2, axis.type = "standard", buffer = 1, ggspectro = FALSE, lower.spectro = TRUE, height.prop = c(5, 1), derivative = FALSE, osc = FALSE, colwave = "black", colbg = "white", spectro.call = NULL, annotation.call = NULL, ...)
 {
 
+  # stop if wave is shorter than t.display
+  if (seewave::duration(wave) <= t.display)
+    stop2("duration of 'wave' must be larger than 't.display'")
+  
   # error message if wavethresh is not installed
   if (derivative & !requireNamespace("imager", quietly = TRUE))
-    stop("must install 'imager' when using spectral derivatives (derivative = TRUE)")
+    stop2("must install 'imager' when using spectral derivatives (derivative = TRUE)")
   
-  if (derivative & ggspectro) warning("spectral derivatives (derivative = TRUE) are not allowed with 'ggspectro'. 'derivative' will be ignored")
+  if (derivative & ggspectro) warning2("spectral derivatives (derivative = TRUE) are not allowed with 'ggspectro'. 'derivative' will be ignored")
   
-  if (osc & lower.spectro) warning("oscillogram (osc = TRUE) are mutually exclusive. 'lower.spectro' will be ignored")
+  if (osc & lower.spectro) warning2("lower.spectro (lower.spectro = TRUE)  and oscillogram (osc = TRUE) are mutually exclusive. 'lower.spectro' will be ignored")
   
   # change lower.spectro if osc = T
   if (osc) lower.spectro <- FALSE
@@ -93,27 +97,27 @@ scrolling_spectro <- function(wave, file.name = "scroll.spectro.mp4", hop.size =
   
   # check call
   if (!is.null(spectro.call)) 
-    if (!is.call(spectro.call)) stop("'spectro.call' is not a call")
+    if (!is.call(spectro.call)) stop2("'spectro.call' is not a call")
   
   # hopsize  
-  if (!is.numeric(hop.size) | hop.size < 0) stop("'hop.size' must be a positive number") 
+  if (!is.numeric(hop.size) | hop.size < 0) stop2("'hop.size' must be a positive number") 
 
   # buffer  
-  if (!is.numeric(buffer) | buffer < 0) stop("'buffer' must be a positive number") 
+  if (!is.numeric(buffer) | buffer < 0) stop2("'buffer' must be a positive number") 
 
   # loop  
-  if (!is.numeric(loop) | loop < 0) stop("'loop' must be a positive number") 
+  if (!is.numeric(loop) | loop < 0) stop2("'loop' must be a positive number") 
 
   # error if buffer and loop > 1
   if (buffer > 0 & loop > 1) {
-    warning("buffer cannot be used (> 0) when loop is > 1. Buffer was set to 0")
+    warning2("buffer cannot be used (> 0) when loop is > 1. Buffer was set to 0")
 
     buffer <- 0
     }  
     
   # If parallel is not numeric
-  if (!is.numeric(parallel)) stop("'parallel' must be a numeric vector of length 1") 
-  if (any(!(parallel %% 1 == 0),parallel < 1)) stop("'parallel' should be a positive integer")
+  if (!is.numeric(parallel)) stop2("'parallel' must be a numeric vector of length 1") 
+  if (any(!(parallel %% 1 == 0),parallel < 1)) stop2("'parallel' should be a positive integer")
   
   # set height prop to 0, 1
   if (!lower.spectro & !osc) height.prop <- c(1, 0)
@@ -184,7 +188,7 @@ scrolling_spectro <- function(wave, file.name = "scroll.spectro.mp4", hop.size =
     flim <- c(0, wave@samp.rate / 2000)
 
   # reset margins at the end
-  opar <- graphics::par()
+  opar <- graphics::par(mar = graphics::par("mar"), bg = graphics::par("bg"), no.readonly = TRUE)
   on.exit(graphics::par(opar), add = TRUE)
   
   # remove temporary files at the end
@@ -275,7 +279,7 @@ scrolling_spectro <- function(wave, file.name = "scroll.spectro.mp4", hop.size =
   grDevices::dev.off()
   }
 
-  graphics::par( bg = "white")
+  graphics::par(bg = "white")
   
   } else {
   ..level.. <- NA
@@ -314,15 +318,12 @@ scrolling_spectro <- function(wave, file.name = "scroll.spectro.mp4", hop.size =
   # calculate pixels per second
   px.per.s <- dim(spc_img)[2] / seewave::duration(wave_sil)
   
-  # set pb options 
-  pbapply::pboptions(type = ifelse(as.logical(pb), "timer", "none"))
-  
   # set clusters for windows OS
   if (Sys.info()[1] == "Windows" & parallel > 1)
     cl <- parallel::makePSOCKcluster(getOption("cl.cores", parallel)) else cl <- parallel
   
   #loop to create image files 
-  out <- pbapply::pblapply(1:frames, function(x){
+  out <- warbleR:::pblapply_wrblr_int(X = seq_len(frames), pbar = pb, function(x){
     
     # time limit
     tlim <- c((x - 1) * step_time, (x - 1) * step_time) - buffer
@@ -432,9 +433,6 @@ scrolling_spectro <- function(wave, file.name = "scroll.spectro.mp4", hop.size =
       annotation.call$labels <- names(ann_alpha)[x]
       # evaluate call
         eval(annotation.call)
-      
-      
-      
       }
     
     # reprint box
@@ -473,15 +471,18 @@ scrolling_spectro <- function(wave, file.name = "scroll.spectro.mp4", hop.size =
       wave <- seewave::pastew(wave2 = wave1, wave1 = wave, f = wave@samp.rate,output = "Wave")
 }
     
-    
-  # resample to 44.1 kHz
-  if (wave@samp.rate != 44100)
-    wave <- seewave::resamp(wave = wave, f = wave@samp.rate, g = 44100, output = "Wave")
-    
   suppressWarnings(tuneR::writeWave(object = wave, filename = temp.audio, extensible = FALSE))
   
+  # resample to 44.1 kHz
+  if (wave@samp.rate != 44100){
+    temp.audio.rsmp <- gsub(".wav$", ".rsmp.wav", temp.audio) 
+    cll_resample <- paste0("ffmpeg -i ", temp.audio, " -ar 44100 ", temp.audio.rsmp)
+    out_resmpl <- system(cll_resample, intern = TRUE, ignore.stdout = TRUE, ignore.stderr = TRUE)
+    temp.audio <- temp.audio.rsmp # overwrite name
+  } 
+  
   # put together call for ffmpeg
-  cll1 <- paste0("ffmpeg -framerate ", fps, " -i ", tempdir(), "/", paste0("%0",nchar(frames) + 2, "d.temp.img.tiff")," -c:v libx264 -profile:v high -crf 2 -pix_fmt yuv420p -y ", temp.video)
+  cll1 <- paste0("ffmpeg -framerate ", fps, " -i ", tempdir(), "/", paste0("%0", nchar(frames) + 2, "d.temp.img.tiff")," -c:v libx264 -profile:v high -crf 2 -pix_fmt yuv420p -y ", temp.video)
   
   # run ffmpeg to create video
   out1 <- system(cll1, intern = TRUE, ignore.stdout = TRUE, ignore.stderr = TRUE)
