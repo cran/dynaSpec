@@ -1,6 +1,6 @@
-87355e21744e7fbc254068c46ab09b7d *DESCRIPTION
+0a099a2b44031e5628e4dd0c87651ed5 *DESCRIPTION
 90ee94090b40a4a3798ae1063252c3b7 *NAMESPACE
-15db9f1d9606ac83d80d4f67a6a5cba6 *NEWS.md
+18ee923a2f1f4bc8242d7ab8de786c43 *NEWS.md
 91a7b375f4217dae549a71741bcb1e6b *R/canyon_wren-data.R
 6609e1d3533433ff4d166deb2cbe43ff *R/dynaSpec-package.R
 ca765139e9dfb1b018f790d70da7035d *R/fading_text_dynaspec_int.R
@@ -12,8 +12,8 @@ f858097cde189a01797bd769111497c7 *R/paged_spectro.R
 ffab4318a1cf7f8947940d24f1aa3cc5 *R/prep_static_ggspectro.R
 8df297fd8d2b749c3a153948764741f6 *R/processSound.R
 0e9b9ce464e57b689edaab0023b6b706 *R/scrolling_spectro.R
-f651f492f412c214892145292f8e0217 *README.md
-dc67f5736e48b9f042500108ddbff179 *data/canyon_wren.rda
+dfc1a8db8105f1266a1cf012f13002c4 *README.md
+a1f302b6f3a73aaa68a3da3729a34de7 *data/canyon_wren.rda
 6aab055cebbae217128486329fff6746 *inst/femaleBarnSwallow.wav
 8051f9cd20db0d8eca5a4263e1c80398 *inst/maleBarnSwallow.wav
 b5e90832f6a1c7c0362c2422dd2887df *man/canyon_wren.Rd
