@@ -1,8 +1,14 @@
+# *dynaSpec 1.0.4*
+* Fixed destFolder parameter in prep_static_ggspectro() and paged_spectro()
+* Should have more expected results for file save locations outside the working directory
+* Fixed issue where extra page sometimes created with paged_spectro()
+* Remove 'ari' package dependency
+
 # *dynaSpec 1.0.3*
 
-* Fix broken colab URL link
+* Fix broken collab URL link
 * Improve sound quality of nightingale wren sound file
-* Fix embeded video links in both github and pkgdown website
+* Fix embedded video links in both github and pkgdown website
 
 
 # *dynaSpec 1.0.2*
