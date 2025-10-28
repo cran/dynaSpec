@@ -1,4 +1,9 @@
+# *dynaSpec 1.0.5*
+
+* Minor changes to improve stability
+
 # *dynaSpec 1.0.4*
+
 * Fixed destFolder parameter in prep_static_ggspectro() and paged_spectro()
 * Should have more expected results for file save locations outside the working directory
 * Fixed issue where extra page sometimes created with paged_spectro()
